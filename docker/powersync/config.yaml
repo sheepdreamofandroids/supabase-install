@@ -1,0 +1,33 @@
+# PowerSync connects to the Supabase Postgres instance for both replication
+# and sync bucket storage. Secrets are read from environment variables
+# injected into the container (see docker-compose.powersync.yml).
+
+# Settings for source database replication.
+replication:
+  connections:
+    - type: postgresql
+      uri: !env PS_REPLICATION_URI
+      sslmode: disable
+
+# Connection settings for sync bucket storage (Postgres).
+storage:
+  type: postgresql
+  uri: !env PS_STORAGE_URI
+  sslmode: disable
+
+# PowerSync API server port (matches container's internal port 80).
+port: 80
+
+# Sync rules: replicate all rows from two common Supabase quickstart tables.
+sync_rules:
+  content: |
+    bucket_definitions:
+      global:
+        data:
+          - SELECT * FROM lists
+          - SELECT * FROM todos
+
+# Client authentication via Supabase JWTs.
+client_auth:
+  supabase: true
+  supabase_jwt_secret: !env PS_SUPABASE_JWT_SECRET
